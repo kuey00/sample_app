@@ -4,8 +4,10 @@ class UsersController < ApplicationController
   before_filter :admin_user,   :only => :destroy
   
   def new
-    @user = User.new
+    redirect_to(root_path) if signed_in?
+
     @title = "Sign up"
+    @user = User.new
   end
   
   def index
@@ -48,8 +50,13 @@ class UsersController < ApplicationController
   end
   
   def destroy
-    User.find(params[:id]).destroy
-    flash[:success] = "User destroyed."
+    if User.find(params[:id]).admin?
+      flash[:error] = "Cannot destory admin user."
+    else
+      User.find(params[:id]).destroy
+      flash[:success] = "User destroyed."
+    end
+    
     redirect_to users_path
   end
   
